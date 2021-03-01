@@ -7,7 +7,7 @@ Simple examples demonstrating the use of GLMeshItem.
 ## Add path to library (just for examples; you do not need this)
 
 
-from pyqtgraph.Qt import QtCore, QtGui
+from pyqtgraph.Qt import QtCore, QtGui,QtWidgets 
 import pyqtgraph.opengl as gl
 import pyqtgraph as pg
 import numpy as np
@@ -51,12 +51,12 @@ d2 = d ** 1 + 0.1
 phi = np.arange(0, 1.2, 1.2/300.)
 z = (d[np.newaxis,...] + phi.reshape(phi.shape[0], 1, 1)) / d2[np.newaxis,...]
 phase = 0
-angle1 = 1
-angle2 = angle1/10
-angle3 = angle1
 
-
-
+X = [0,0,0,0,0]
+Angle = [0,0,0,0,0]
+A = [0,0,0,0,0]
+Finished = [False,False,False,False,False]
+AllFinished = False
 
 
 
@@ -239,35 +239,87 @@ w.addItem(m14)
 
 
 
-
 def start():
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
         QtGui.QApplication.instance().exec_()
 
 
+X[0] = int(input("Enter angle for motor 1: "))
+X[1] = int(input("Enter angle for motor 2: "))
+X[2] = int(input("Enter angle for motor 3: "))
+X[3] = int(input("Enter angle for motor 4: "))
+X[4] = int(input("Enter angle for motor 5: "))
+
+
 
 def update():
-    global angle1,angle2,angle3
+
+    
+    
+
     w.updateGL()
-    m0.rotate(angle2,0,0,1,True)
-    S1.rotate(angle2,0,1,0,True)
-    S3.rotate(-angle2,0,1,0,True)
-    S5.rotate(angle2,0,1,0,True)
-    S6.rotate(angle1,0,1,0,True)
+    m0.rotate(A[0],0,0,1,True)
+    S1.rotate(A[1],0,1,0,True)
+    S3.rotate(A[2],0,1,0,True)
+    S5.rotate(A[3],0,1,0,True)
+    S6.rotate(A[4],0,1,0,True)
     w.updateGL()
+    print(Angle[0])
+    print("Angle1")
+    print(X[0])
+    print("X0")
+    
+    
+def UserInput():
+    global Angle,AllFinished,X
+    
+    
+    for x in range (5):
+        if X[x] > 0:
+            Angle[x] += X[x]/1000
+            A[x] = X[x]/1000
+            if Angle[x] > X[x]:
+                A[x] = 0
+                Finished[x] = True
+        if X[x] < 0:
+            Angle[x] += X[x]/1000
+            A[x] = X[x] / 1000
+            if Angle[x] < X[x]:
+                A[x] = 0
+                Finished[x] = True
 
 
 
+    for x in range(5):
+        AllFinished = True
+        if Finished[x] == False:
+            AllFinished = False
+        if AllFinished == True:
+            X[0] = int(input("Enter angle for motor 1: "))
+            X[1] = int(input("Enter angle for motor 2: "))
+            X[2] = int(input("Enter angle for motor 3: "))
+            X[3] = int(input("Enter angle for motor 4: "))
+            X[4] = int(input("Enter angle for motor 5: "))
+            for x in range (5):
+                Finished[x] = False
+                Angle[x] = 0
+    
+    
+     
+    
 
 timer = QtCore.QTimer()
 timer.timeout.connect(update)
+timer.timeout.connect(UserInput)
 timer.start(30)
 start()
 
 
+         
 
 # Start Qt event loop unless running in interactive mode.
 if __name__ == '__main__':
+
     import sys
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
         QtGui.QApplication.instance().exec_()
